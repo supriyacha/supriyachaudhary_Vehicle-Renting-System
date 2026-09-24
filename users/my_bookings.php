@@ -19,6 +19,7 @@ $sql = "SELECT
         booking.return_date,
         booking.total_amount,
         booking.payment_method,
+        booking.payment_status,
         booking.status
         FROM booking
         INNER JOIN vehicles
@@ -32,11 +33,7 @@ if (!$stmt) {
     die("Database Error: " . mysqli_error($conn));
 }
 
-mysqli_stmt_bind_param(
-    $stmt,
-    "i",
-    $user_id
-);
+mysqli_stmt_bind_param($stmt, "i", $user_id);
 
 mysqli_stmt_execute($stmt);
 
@@ -46,11 +43,15 @@ $result = mysqli_stmt_get_result($stmt);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>My Bookings</title>
+
     <style>
+
         body {
             font-family: Arial, sans-serif;
             background: #f2f2f2;
@@ -87,7 +88,7 @@ $result = mysqli_stmt_get_result($stmt);
         }
 
         .table-container {
-            width: 90%;
+            width: 95%;
             margin: 40px auto;
             overflow-x: auto;
         }
@@ -104,7 +105,8 @@ $result = mysqli_stmt_get_result($stmt);
             border: 1px solid gray;
         }
 
-        th,td {
+        th,
+        td {
             padding: 12px;
             text-align: center;
         }
@@ -123,104 +125,149 @@ $result = mysqli_stmt_get_result($stmt);
             padding: 20px;
         }
 
+        /* eSewa Button */
+
+        .esewa-btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .esewa-btn:hover {
+            background: #218838;
+        }
+
+        .paid {
+            color: green;
+            font-weight: bold;
+        }
+
+        .pending {
+            color: #d68910;
+            font-weight: bold;
+        }
     </style>
-
 </head>
-
 <body>
     <header>
-
         <h2>
             Vehicle Renting System (2-Wheelers)
         </h2>
-
         <nav>
             <a href="dashboard.php">
                 Dashboard
             </a>
-
             <a href="vehicles.php">
                 Vehicles
             </a>
-
             <a href="logout.php" onclick="return confirmLogout();">
                 Logout
             </a>
-
         </nav>
-
     </header>
-
     <h1>
         My Bookings
     </h1>
-
     <div class="table-container">
         <table>
             <tr>
                 <th>
                     Vehicle
                 </th>
-
                 <th>
                     Booking Date
                 </th>
-
                 <th>
                     Return Date
                 </th>
-
                 <th>
                     Total Amount
                 </th>
-
                 <th>
                     Payment Method
                 </th>
-
+                <th>
+                    Payment
+                </th>
                 <th>
                     Status
                 </th>
             </tr>
-
             <?php
             // Check if bookings exist
             if (mysqli_num_rows($result) > 0) {
-                // Start while loop
                 while ($row = mysqli_fetch_assoc($result)) {
             ?>
                     <tr>
+                        <!-- Vehicle -->
                         <td>
-                            <?php echo htmlspecialchars($row['vehicle_name']);?>
+                            <?php
+                            echo htmlspecialchars($row['vehicle_name']);
+                            ?>
                         </td>
-
+                        <!-- Booking Date -->
                         <td>
-                            <?php echo htmlspecialchars($row['booking_date']);?>
+                            <?php
+                            echo htmlspecialchars($row['booking_date']);
+                            ?>
                         </td>
-
+                        <!-- Return Date -->
                         <td>
-                            <?php echo htmlspecialchars($row['return_date']);?>
+                            <?php
+                            echo htmlspecialchars($row['return_date']);
+                            ?>
                         </td>
-
+                        <!-- Total Amount -->
                         <td>
-                            Rs.<?php echo number_format($row['total_amount'], 2);?>
+                            Rs.
+                            <?php
+                            echo number_format($row['total_amount'], 2);
+                            ?>
                         </td>
-
+                        <!-- Payment Method -->
                         <td>
-                            <?php echo htmlspecialchars($row['payment_method']); ?>
+                            <?php
+                            echo htmlspecialchars($row['payment_method']);
+                            ?>
                         </td>
-
+                        <!-- Payment -->
                         <td>
-                            <?php echo htmlspecialchars($row['status']);?>
+                            <?php
+                            if ($row['payment_status'] == 'Paid') {
+                            ?>
+                                <span class="paid">
+                                    Payment Completed
+                                </span>
+                            <?php
+                            } else {
+                            ?>
+                                <a href="esewa_payment.php?booking_id=<?php echo $row['id']; ?>"class="esewa-btn">
+                                    Pay with eSewa
+                                </a>
+                            <?php
+                            }
+                            ?>
+                        </td>
+                        <!-- Booking Status -->
+                        <td>
+                            <?php
+                            echo htmlspecialchars($row['status']);
+                            ?>
                         </td>
                     </tr>
             <?php
-                } // End while loop
+                }
             } else {
             ?>
                 <tr>
                     <td
-                        colspan="5" class="no-booking">
+                        colspan="7"
+                        class="no-booking"
+                    >
                         You have no bookings yet.
                     </td>
                 </tr>
@@ -235,7 +282,6 @@ $result = mysqli_stmt_get_result($stmt);
             return confirm(
                 "Are you sure you want to logout?"
             );
-
         }
     </script>
 </body>

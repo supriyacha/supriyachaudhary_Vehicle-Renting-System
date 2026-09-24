@@ -290,7 +290,8 @@ session_start();
             customers to register, log in, browse available vehicles and
             book vehicles online.<br>It provides a fast, secure and convenient
             way to rent vehicles while helping administrators manage vehicles,
-            customers and bookings efficiently.
+            customers and bookings efficiently. <br>
+            We can add product service charge Rs. 500.
         </p>
     </section>
 
